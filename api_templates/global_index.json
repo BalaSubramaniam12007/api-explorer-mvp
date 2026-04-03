@@ -1,4 +1,13 @@
 {
-  "apis": [],
-  "categories": []
+  "apis": [
+    {
+      "id": "petstore",
+      "name": "Petstore API",
+      "category": "demo",
+      "latest_version": "2026-04-03"
+    }
+  ],
+  "categories": [
+    "demo"
+  ]
 }

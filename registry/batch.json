@@ -1,6 +1,8 @@
 {
   "batches": [
-    []
+    [
+      "petstore"
+    ]
   ],
   "current_batch_index": 0
 }
