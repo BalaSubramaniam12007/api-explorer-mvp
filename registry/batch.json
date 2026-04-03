@@ -1,4 +1,6 @@
 {
-  "current_batch_index": 0,
-  "batches": []
+  "batches": [
+    []
+  ],
+  "current_batch_index": 0
 }
