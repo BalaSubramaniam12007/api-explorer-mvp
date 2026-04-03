@@ -1,0 +1,48 @@
+name: source-ingestion
+
+on:
+  push:
+    paths:
+      - registry/input.json
+  workflow_dispatch:
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      # Pull repository contents.
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Set Python runtime.
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Merge input into registry and batches.
+      - name: Run ingestion
+        run: python scripts/ingest.py
+
+      # Set Dart runtime.
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+
+      # Resolve Dart dependencies.
+      - name: Get pipeline dependencies
+        run: |
+          cd pipeline
+          dart pub get
+
+      # Generate templates and indexes for all registered APIs.
+      - name: Run pipeline generation
+        run: dart run pipeline/bin/generate_templates.dart --all
+
+      # Commit only if files changed.
+      - name: Commit updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add registry/input.json registry/registry.json registry/batch.json api_templates/current.json api_templates/global_index.json api_templates/apis
+          git diff --cached --quiet || git commit -m "chore: ingest new api sources"
+          git push

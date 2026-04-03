@@ -1,0 +1,12 @@
+name: api_explorer_pipeline
+description: Minimal pipeline for API template generation.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.3.0
+
+dependencies:
+  http: ^1.2.2
+  openapi_spec: ^0.7.8
+  yaml: ^3.1.3
