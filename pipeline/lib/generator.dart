@@ -30,8 +30,7 @@ Future<List<String>> targetApiIds({
   if (all) return registry.keys.toList();
   final updates = await readJson(updatesFile);
   final updated = updates['updated_ids'];
-  if (updated is List && updated.isNotEmpty)
-    return updated.map((e) => e.toString()).toList();
+  if (updated is List) return updated.map((e) => e.toString()).toList();
   return registry.keys.toList();
 }
 

@@ -13,6 +13,7 @@ Future<void> main(List<String> args) async {
     registry: registry,
     updatesFile: File('${root.path}/registry/updates.json'),
   );
+  if (targets.isEmpty) return;
   final version = DateTime.now().toUtc().toIso8601String().split('T').first;
 
   for (final apiId in targets) {

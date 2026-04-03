@@ -39,15 +39,17 @@ jobs:
           cd pipeline
           dart pub get
 
-      # Generate templates and indexes for all registered APIs.
+      # Generate templates and indexes for newly ingested APIs.
       - name: Run pipeline generation
-        run: dart run pipeline/bin/generate_templates.dart --all
+        run: dart run pipeline/bin/generate_templates.dart
 
       # Commit only if files changed.
       - name: Commit updates
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add registry/input.json registry/registry.json registry/batch.json api_templates/current.json api_templates/global_index.json api_templates/apis
-          git diff --cached --quiet || git commit -m "chore: ingest new api sources"
-          git push
+          git add registry/input.json registry/registry.json registry/batch.json registry/updates.json api_templates/current.json api_templates/global_index.json api_templates/apis
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: ingest new api sources"
+            git push
+          fi

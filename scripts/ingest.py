@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -40,7 +41,7 @@ def main() -> None:
     if not batches:
         batches = [[]]
 
-    existing = set(registry)
+    new_ids = [sid for sid in intake if sid not in registry]
     registry.update(intake)
     assigned = {sid for batch in batches for sid in batch}
 
@@ -54,6 +55,16 @@ def main() -> None:
 
     write_json(REGISTRY / "registry.json", registry)
     write_json(REGISTRY / "batch.json", batch_state)
+    write_json(
+        REGISTRY / "updates.json",
+        {
+            "last_run_at": datetime.now(timezone.utc).isoformat(),
+            "processed_batch_index": batch_state["current_batch_index"],
+            "processed_ids": new_ids,
+            "updated_ids": new_ids,
+            "errors": {},
+        },
+    )
     write_json(REGISTRY / "input.json", {})
 
 
