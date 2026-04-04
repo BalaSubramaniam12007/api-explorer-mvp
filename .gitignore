@@ -1,0 +1,9 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Docs folder
+docs/
+
+# Dart cache / tool files
+.dart_tool/
