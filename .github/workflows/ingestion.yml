@@ -1,3 +1,10 @@
+# ============================================================
+# WORKFLOW: source-ingestion
+# TRIGGER : Push to registry/input.json  |  manual dispatch
+# PURPOSE : Ingest new API sources, generate templates,
+#           commit storage, update CDN pointer, purge cache.
+# ============================================================
+
 name: source-ingestion
 
 permissions:
@@ -12,44 +19,120 @@ on:
 jobs:
   ingest:
     runs-on: ubuntu-latest
+
     steps:
-      # Pull repository contents.
-      - name: Checkout
+      # ── 1. CHECKOUT ────────────────────────────────────────
+      # Persist credentials so subsequent git push steps work
+      # without needing a separate token setup.
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           persist-credentials: true
 
-      # Set Python runtime.
+      # ── 2. GUARD ───────────────────────────────────────────
+      # Detect [skip ci] in the latest commit message.
+      # Prevents re-triggering this workflow from its own bot
+      # commits (important: push path includes input.json).
+      - name: Detect skip-ci marker
+        id: guard
+        run: |
+          MSG="$(git log -1 --pretty=%B)"
+          if echo "$MSG" | grep -qi '\[skip ci\]'; then
+            echo "skip=true"  >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # ── 3. RUNTIMES ────────────────────────────────────────
+      # Set up Python and Dart only when we are not skipping.
       - name: Setup Python
+        if: steps.guard.outputs.skip != 'true'
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      # Merge input into registry and batches.
-      - name: Run ingestion
-        run: python scripts/ingest.py
-
-      # Set Dart runtime.
       - name: Setup Dart
+        if: steps.guard.outputs.skip != 'true'
         uses: dart-lang/setup-dart@v1
 
-      # Resolve Dart dependencies.
+      # ── 4. INGEST ──────────────────────────────────────────
+      # Merges registry/input.json → registry/registry.json
+      # and assigns new entries into registry/batch.json.
+      - name: Run ingestion
+        if: steps.guard.outputs.skip != 'true'
+        run: python scripts/ingest.py
+
+      # ── 5. PIPELINE ────────────────────────────────────────
+      # Resolves Dart dependencies then generates versioned
+      # api_templates/ from the newly ingested entries.
       - name: Get pipeline dependencies
+        if: steps.guard.outputs.skip != 'true'
         run: |
           cd pipeline
           dart pub get
 
-      # Generate templates and indexes for newly ingested APIs.
       - name: Run pipeline generation
+        if: steps.guard.outputs.skip != 'true'
         run: dart run pipeline/bin/generate_templates.dart
 
-      # Commit only if files changed.
-      - name: Commit updates
+      # ── 6. COMMIT STORAGE ──────────────────────────────────
+      # Commits registry files + generated templates.
+      # NOTE: message includes [skip ci] to prevent the push
+      # from re-triggering the on-push path filter above.
+      - name: Commit storage updates
+        id: commit_storage
+        if: steps.guard.outputs.skip != 'true'
         run: |
-          git config user.name "github-actions[bot]"
+          git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add registry/input.json registry/registry.json registry/batch.json registry/updates.json api_templates/current.json api_templates/global_index.json api_templates/apis
+
+          git add \
+            registry/input.json \
+            registry/registry.json \
+            registry/batch.json \
+            registry/updates.json \
+            api_templates/global_index.json \
+            api_templates/apis
+
           if ! git diff --cached --quiet; then
-            git commit -m "chore: ingest new api sources"
+            git commit -m "chore: ingest new api sources [skip ci]"
             git push
+            echo "pushed=true"  >> "$GITHUB_OUTPUT"
+          else
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
           fi
+
+      # ── 7. FINALIZE POINTER ────────────────────────────────
+      # Writes api_templates/current.json with the SHA of the
+      # storage commit just pushed (not HEAD before push).
+      # A diff-check avoids an empty commit if pointer is
+      # already up to date.
+      - name: Finalize CDN pointer
+        id: commit_pointer
+        if: steps.commit_storage.outputs.pushed == 'true'
+        run: |
+          SHA="$(git rev-parse HEAD)"
+          printf '{\n  "sha": "%s"\n}\n' "$SHA" > api_templates/current.json
+
+          git add api_templates/current.json
+
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: update CDN pointer [skip ci]"
+            git push
+            echo "pushed=true"  >> "$GITHUB_OUTPUT"
+          else
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # ── 8. PURGE CDN CACHE ─────────────────────────────────
+      # Waits for GitHub to propagate the new commit to its
+      # CDN edge, then purges only the mutable pointer file.
+      # The || true ensures a jsDelivr outage never fails CI.
+      - name: Purge jsDelivr pointer cache
+        if: steps.commit_pointer.outputs.pushed == 'true'
+        run: |
+          echo "Waiting 15 s for GitHub CDN propagation..."
+          sleep 15
+          curl -fsSL \
+            "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/api_templates/current.json" \
+            || true

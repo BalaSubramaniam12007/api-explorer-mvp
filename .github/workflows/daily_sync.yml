@@ -1,3 +1,11 @@
+# ============================================================
+# WORKFLOW: daily-sync
+# TRIGGER : Cron 02:00 UTC every day  |  manual dispatch
+# PURPOSE : Process one pending batch, refresh hashes,
+#           regenerate templates, commit storage, update CDN
+#           pointer, purge cache.
+# ============================================================
+
 name: daily-sync
 
 permissions:
@@ -12,43 +20,99 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      # Pull repository contents.
-      - name: Checkout
+      # ── 1. CHECKOUT ────────────────────────────────────────
+      # Persist credentials so subsequent git push steps work
+      # without needing a separate token setup.
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           persist-credentials: true
 
-      # Set Python runtime.
+      # ── 2. RUNTIMES ────────────────────────────────────────
+      # NOTE: No skip-ci guard is needed here because the
+      # schedule trigger is immune to push-path re-triggering.
+      # Bot commits from this workflow cannot cause a loop.
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      # Set Dart runtime.
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
 
-      # Resolve Dart dependencies.
+      # ── 3. SYNC + HASH ─────────────────────────────────────
+      # Processes the next pending batch and refreshes
+      # registry/hashes.json with updated fingerprints.
+      - name: Run sync and hashing
+        run: python scripts/sync_hash.py
+
+      # ── 4. PIPELINE ────────────────────────────────────────
+      # Resolves Dart dependencies then rebuilds api_templates/
+      # for any entries that changed during the sync step.
       - name: Get pipeline dependencies
         run: |
           cd pipeline
           dart pub get
 
-      # Process one batch and refresh hashes.
-      - name: Run sync + hashing
-        run: python scripts/sync_hash.py
-
-      # Build templates into versioned storage layout.
       - name: Run pipeline generation
         run: dart run pipeline/bin/generate_templates.dart
 
-      # Commit only if files changed.
-      - name: Commit updates
+      # ── 5. COMMIT STORAGE ──────────────────────────────────
+      # Commits hash + template storage updates.
+      # Includes [skip ci] as a defensive habit even though
+      # the schedule trigger cannot cause a loop — keeps
+      # commit hygiene consistent with source-ingestion.
+      - name: Commit storage updates
+        id: commit_storage
         run: |
-          git config user.name "github-actions[bot]"
+          git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add registry/hashes.json registry/batch.json registry/updates.json api_templates/current.json api_templates/global_index.json api_templates/apis
+
+          git add \
+            registry/hashes.json \
+            registry/batch.json \
+            registry/updates.json \
+            api_templates/global_index.json \
+            api_templates/apis
+
           if ! git diff --cached --quiet; then
-            git commit -m "chore: daily sync hashes"
+            git commit -m "chore: daily sync and hash refresh [skip ci]"
             git push
+            echo "pushed=true"  >> "$GITHUB_OUTPUT"
+          else
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
           fi
+
+      # ── 6. FINALIZE POINTER ────────────────────────────────
+      # Writes api_templates/current.json with the SHA of the
+      # storage commit just pushed (not a pre-push HEAD).
+      # A diff-check avoids an empty commit on no-op days.
+      - name: Finalize CDN pointer
+        id: commit_pointer
+        if: steps.commit_storage.outputs.pushed == 'true'
+        run: |
+          SHA="$(git rev-parse HEAD)"
+          printf '{\n  "sha": "%s"\n}\n' "$SHA" > api_templates/current.json
+
+          git add api_templates/current.json
+
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: update CDN pointer [skip ci]"
+            git push
+            echo "pushed=true"  >> "$GITHUB_OUTPUT"
+          else
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # ── 7. PURGE CDN CACHE ─────────────────────────────────
+      # Waits for GitHub to propagate the new commit to its
+      # CDN edge, then purges only the mutable pointer file.
+      # The || true ensures a jsDelivr outage never fails CI.
+      - name: Purge jsDelivr pointer cache
+        if: steps.commit_pointer.outputs.pushed == 'true'
+        run: |
+          echo "Waiting 15 s for GitHub CDN propagation..."
+          sleep 15
+          curl -fsSL \
+            "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/api_templates/current.json" \
+            || true
