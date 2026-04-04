@@ -1,7 +1,8 @@
 {
   "batches": [
     [
-      "petstore"
+      "petstore",
+      "Github"
     ]
   ],
   "current_batch_index": 0

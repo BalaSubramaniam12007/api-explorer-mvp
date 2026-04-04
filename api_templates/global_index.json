@@ -1,6 +1,12 @@
 {
   "apis": [
     {
+      "id": "Github",
+      "name": "Github API",
+      "category": "Tools",
+      "latest_version": "2026-04-04"
+    },
+    {
       "id": "petstore",
       "name": "Petstore API",
       "category": "demo",
@@ -8,6 +14,7 @@
     }
   ],
   "categories": [
+    "Tools",
     "demo"
   ]
 }
