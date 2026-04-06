@@ -11,10 +11,17 @@
       "name": "Petstore API",
       "category": "demo",
       "latest_version": "2026-04-03"
+    },
+    {
+      "id": "stripe",
+      "name": "Stripe API",
+      "category": "payments",
+      "latest_version": "2026-04-06"
     }
   ],
   "categories": [
     "Tools",
-    "demo"
+    "demo",
+    "payments"
   ]
 }

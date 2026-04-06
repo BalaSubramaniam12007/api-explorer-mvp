@@ -3,7 +3,8 @@
   "batches": [
     [
       "petstore",
-      "Github"
+      "Github",
+      "stripe"
     ]
   ],
   "current_batch_index": 0
