@@ -1,4 +1,5 @@
 {
+  "batch_size": 3,
   "batches": [
     [
       "petstore",

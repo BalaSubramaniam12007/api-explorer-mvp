@@ -32,23 +32,36 @@ def pick_batch(batches: list[list[str]], size: int) -> list[str]:
 
 def main() -> None:
     """Merge intake into registry, assign batches, and clear intake."""
-    batch_size = max(1, int(os.getenv("BATCH_SIZE", "3")))
     intake = read_json(REGISTRY / "input.json")
     registry = read_json(REGISTRY / "registry.json")
     batch_state = read_json(REGISTRY / "batch.json")
-    batches: list[list[str]] = batch_state.get("batches", [])
 
+    # Batch size comes from state (default 3 or env override for ops flexibility)
+    batch_state.setdefault("batch_size", int(os.getenv("BATCH_SIZE", "3")))
+    batch_size = max(1, int(batch_state["batch_size"]))
+
+    # Drop empty batches to avoid placeholder arrays
+    batches: list[list[str]] = [batch for batch in batch_state.get("batches", []) if batch]
     if not batches:
         batches = [[]]
 
     new_ids = [sid for sid in intake if sid not in registry]
     registry.update(intake)
+
     assigned = {sid for batch in batches for sid in batch}
 
+    def assign(api_id: str) -> None:
+        pick_batch(batches, batch_size).append(api_id)
+
+    # Place new intake first into existing batches where space allows
+    for sid in new_ids:
+        assign(sid)
+
+    # Backfill any unassigned registry entries without creating empty slots
     for sid in registry:
-        if sid in assigned:
+        if sid in assigned or sid in new_ids:
             continue
-        pick_batch(batches, batch_size).append(sid)
+        assign(sid)
 
     batch_state["batches"] = batches
     batch_state["current_batch_index"] = min(batch_state.get("current_batch_index", 0), len(batches) - 1)

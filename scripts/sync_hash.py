@@ -40,6 +40,7 @@ def main() -> None:
 
     index = batch_state.get("current_batch_index", 0) % len(batches)
     current_batch = list(batches[index])
+    next_index = (index + 1) % len(batches)
     updated: list[str] = []
     errors: dict[str, str] = {}
 
@@ -56,7 +57,7 @@ def main() -> None:
             errors[api_id] = str(exc)
 
     batch_state["batches"] = batches
-    batch_state["current_batch_index"] = (index + 1) % len(batches)
+    batch_state["current_batch_index"] = next_index
 
     write_json(REGISTRY / "hashes.json", hashes)
     write_json(REGISTRY / "batch.json", batch_state)
@@ -66,6 +67,7 @@ def main() -> None:
             "errors": errors,
             "last_run_at": datetime.now(timezone.utc).isoformat(),
             "processed_batch_index": index,
+            "next_batch_index": next_index,
             "processed_ids": current_batch,
             "updated_ids": updated,
         },
