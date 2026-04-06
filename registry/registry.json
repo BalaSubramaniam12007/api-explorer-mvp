@@ -18,10 +18,5 @@
     "category": "demo",
     "name": "Petstore API",
     "openapi_url": "https://petstore3.swagger.io/api/v3/openapi.json"
-  },
-  "stripe": {
-    "category": "payments",
-    "name": "Stripe API",
-    "openapi_url": "https://raw.githubusercontent.com/stripe/openapi/master/openapi/spec3.json"
   }
 }
