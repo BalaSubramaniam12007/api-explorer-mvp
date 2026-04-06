@@ -22,10 +22,11 @@ Future<void> writeJson(File file, Object data) async {
   );
 }
 
-/// Returns a non-existing `yyyy-MM-dd` version for [apiId].
+/// Returns a non-existing version for [apiId] anchored to [requestedVersion].
 ///
-/// If [requestedVersion] is already present, this increments by day until
-/// it finds the next free date-like version folder name.
+/// Uses `yyyy-MM-dd` for the first run of a day. If already present,
+/// appends `-vN` (e.g., `2026-04-06-v2`) to avoid overwriting while keeping
+/// the calendar date accurate.
 Future<String> resolveVersionForApi({
   required Directory root,
   required String apiId,
@@ -38,16 +39,19 @@ Future<String> resolveVersionForApi({
     ...((existing['versions'] as List?)?.map((e) => e.toString()) ?? []),
   };
 
-  var candidate = requestedVersion;
-  var date = DateTime.parse('${requestedVersion}T00:00:00Z');
+  final baseExists = versions.contains(requestedVersion) ||
+      await Directory('${apiRoot.path}/$requestedVersion').exists();
+  if (!baseExists) return requestedVersion;
 
-  while (versions.contains(candidate) ||
-      await Directory('${apiRoot.path}/$candidate').exists()) {
-    date = date.add(const Duration(days: 1));
-    candidate = date.toIso8601String().split('T').first;
+  var counter = 2;
+  while (true) {
+    final candidate = '$requestedVersion-v$counter';
+    if (!versions.contains(candidate) &&
+        !await Directory('${apiRoot.path}/$candidate').exists()) {
+      return candidate;
+    }
+    counter++;
   }
-
-  return candidate;
 }
 
 /// Returns API IDs to process: from [updatesFile] unless [all] is true.
