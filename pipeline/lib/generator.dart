@@ -22,6 +22,34 @@ Future<void> writeJson(File file, Object data) async {
   );
 }
 
+/// Returns a non-existing `yyyy-MM-dd` version for [apiId].
+///
+/// If [requestedVersion] is already present, this increments by day until
+/// it finds the next free date-like version folder name.
+Future<String> resolveVersionForApi({
+  required Directory root,
+  required String apiId,
+  required String requestedVersion,
+}) async {
+  final apiRoot = Directory('${root.path}/api_templates/apis/$apiId');
+  final indexFile = File('${apiRoot.path}/index.json');
+  final existing = await readJson(indexFile);
+  final versions = <String>{
+    ...((existing['versions'] as List?)?.map((e) => e.toString()) ?? []),
+  };
+
+  var candidate = requestedVersion;
+  var date = DateTime.parse('${requestedVersion}T00:00:00Z');
+
+  while (versions.contains(candidate) ||
+      await Directory('${apiRoot.path}/$candidate').exists()) {
+    date = date.add(const Duration(days: 1));
+    candidate = date.toIso8601String().split('T').first;
+  }
+
+  return candidate;
+}
+
 /// Returns API IDs to process: from [updatesFile] unless [all] is true.
 Future<List<String>> targetApiIds({
   required bool all,
@@ -51,13 +79,21 @@ Future<void> generateForApi({
 
   final templates = extractTemplates(apiId: apiId, spec: spec);
   final apiRoot = Directory('${root.path}/api_templates/apis/$apiId');
-  await writeJson(File('${apiRoot.path}/$version/templates.json'), templates);
+  final targetVersion = await resolveVersionForApi(
+    root: root,
+    apiId: apiId,
+    requestedVersion: version,
+  );
+  await writeJson(
+    File('${apiRoot.path}/$targetVersion/templates.json'),
+    templates,
+  );
 
   final indexFile = File('${apiRoot.path}/index.json');
   final existing = await readJson(indexFile);
   final versions = <String>{
     ...((existing['versions'] as List?)?.map((e) => e.toString()) ?? []),
-    version,
+    targetVersion,
   }.toList()
     ..sort();
 
@@ -65,7 +101,7 @@ Future<void> generateForApi({
     'id': apiId,
     'name': source['name']?.toString() ?? apiId,
     'category': source['category']?.toString() ?? 'uncategorized',
-    'latest_version': version,
+    'latest_version': targetVersion,
     'versions': versions,
   });
 }
