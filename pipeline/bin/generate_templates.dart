@@ -3,16 +3,18 @@ import 'dart:io';
 /// Runs template generation using parser + storage modules.
 import 'package:api_explorer_pipeline/generator.dart';
 
-/// Entrypoint for generation run.
+/// Generates templates for changed APIs and refreshes the global index.
 Future<void> main(List<String> args) async {
   final all = args.contains('--all');
   final root = Directory.current;
+
   final registry = await readJson(File('${root.path}/registry/registry.json'));
   final targets = await targetApiIds(
     all: all,
     registry: registry,
     updatesFile: File('${root.path}/registry/updates.json'),
   );
+
   if (targets.isEmpty) return;
   final version = DateTime.now().toUtc().toIso8601String().split('T').first;
 
@@ -28,5 +30,4 @@ Future<void> main(List<String> args) async {
   }
 
   await refreshGlobalIndex(root, registry);
-  await writeCurrent(root);
 }
