@@ -1,7 +1,1 @@
-{
-  "Demo": {
-    "category": "Tools",
-    "name": "DEMO API",
-    "openapi_url": "https://raw.githubusercontent.com/BalaSubramaniam12007/api-explorer-mvp/refs/heads/main/demo_Spec/demo.yaml"
-  }  
-}
+{}

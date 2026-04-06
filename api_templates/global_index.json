@@ -1,6 +1,12 @@
 {
   "apis": [
     {
+      "id": "Demo",
+      "name": "DEMO API",
+      "category": "Tools",
+      "latest_version": "2026-04-06"
+    },
+    {
       "id": "Github",
       "name": "Github API",
       "category": "Tools",

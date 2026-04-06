@@ -1,12 +1,11 @@
 {
   "errors": {},
-  "last_run_at": "2026-04-06T18:26:40.269604+00:00",
-  "next_batch_index": 0,
-  "processed_batch_index": 1,
+  "last_run_at": "2026-04-06T20:01:11.640939+00:00",
+  "processed_batch_index": 0,
   "processed_ids": [
-    "myapi"
+    "Demo"
   ],
   "updated_ids": [
-    "myapi"
+    "Demo"
   ]
 }

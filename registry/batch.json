@@ -7,7 +7,8 @@
       "stripe"
     ],
     [
-      "myapi"
+      "myapi",
+      "Demo"
     ]
   ],
   "current_batch_index": 0

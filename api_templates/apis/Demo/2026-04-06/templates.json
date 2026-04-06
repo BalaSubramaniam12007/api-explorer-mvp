@@ -1,0 +1,77 @@
+[
+  {
+    "id": "demo-get-registry",
+    "apiType": "rest",
+    "name": "List all registered APIs",
+    "description": "",
+    "httpRequestModel": {
+      "method": "get",
+      "url": "/registry",
+      "headers": [],
+      "params": [],
+      "authModel": {
+        "type": "none",
+        "apikey": null,
+        "bearer": null,
+        "basic": null,
+        "jwt": null,
+        "digest": null,
+        "oauth1": null,
+        "oauth2": null
+      },
+      "isHeaderEnabledList": [],
+      "isParamEnabledList": [],
+      "bodyContentType": "json",
+      "body": null,
+      "query": null,
+      "formData": []
+    },
+    "responseStatus": null,
+    "message": null,
+    "httpResponseModel": null,
+    "preRequestScript": null,
+    "postRequestScript": null,
+    "aiRequestModel": null
+  },
+  {
+    "id": "demo-get-registry-apiid",
+    "apiType": "rest",
+    "name": "Get a single registered API entry",
+    "description": "",
+    "httpRequestModel": {
+      "method": "get",
+      "url": "/registry/{apiId}",
+      "headers": [],
+      "params": [
+        {
+          "name": "apiId",
+          "value": "{{APIID}}"
+        }
+      ],
+      "authModel": {
+        "type": "none",
+        "apikey": null,
+        "bearer": null,
+        "basic": null,
+        "jwt": null,
+        "digest": null,
+        "oauth1": null,
+        "oauth2": null
+      },
+      "isHeaderEnabledList": [],
+      "isParamEnabledList": [
+        true
+      ],
+      "bodyContentType": "json",
+      "body": null,
+      "query": null,
+      "formData": []
+    },
+    "responseStatus": null,
+    "message": null,
+    "httpResponseModel": null,
+    "preRequestScript": null,
+    "postRequestScript": null,
+    "aiRequestModel": null
+  }
+]
