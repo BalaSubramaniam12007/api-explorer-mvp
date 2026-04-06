@@ -1,0 +1,193 @@
+[
+  {
+    "id": "myapi-get-posts",
+    "apiType": "rest",
+    "name": "List all posts",
+    "description": "",
+    "httpRequestModel": {
+      "method": "get",
+      "url": "https://jsonplaceholder.typicode.com/posts",
+      "headers": [],
+      "params": [],
+      "authModel": {
+        "type": "none",
+        "apikey": null,
+        "bearer": null,
+        "basic": null,
+        "jwt": null,
+        "digest": null,
+        "oauth1": null,
+        "oauth2": null
+      },
+      "isHeaderEnabledList": [],
+      "isParamEnabledList": [],
+      "bodyContentType": "json",
+      "body": null,
+      "query": null,
+      "formData": []
+    },
+    "responseStatus": null,
+    "message": null,
+    "httpResponseModel": null,
+    "preRequestScript": null,
+    "postRequestScript": null,
+    "aiRequestModel": null
+  },
+  {
+    "id": "myapi-post-posts",
+    "apiType": "rest",
+    "name": "Create a new post",
+    "description": "",
+    "httpRequestModel": {
+      "method": "post",
+      "url": "https://jsonplaceholder.typicode.com/posts",
+      "headers": [],
+      "params": [],
+      "authModel": {
+        "type": "none",
+        "apikey": null,
+        "bearer": null,
+        "basic": null,
+        "jwt": null,
+        "digest": null,
+        "oauth1": null,
+        "oauth2": null
+      },
+      "isHeaderEnabledList": [],
+      "isParamEnabledList": [],
+      "bodyContentType": "json",
+      "body": "{}",
+      "query": null,
+      "formData": []
+    },
+    "responseStatus": null,
+    "message": null,
+    "httpResponseModel": null,
+    "preRequestScript": null,
+    "postRequestScript": null,
+    "aiRequestModel": null
+  },
+  {
+    "id": "myapi-get-posts-id",
+    "apiType": "rest",
+    "name": "Get a post by ID",
+    "description": "",
+    "httpRequestModel": {
+      "method": "get",
+      "url": "https://jsonplaceholder.typicode.com/posts/{id}",
+      "headers": [],
+      "params": [
+        {
+          "name": "id",
+          "value": "{{ID}}"
+        }
+      ],
+      "authModel": {
+        "type": "none",
+        "apikey": null,
+        "bearer": null,
+        "basic": null,
+        "jwt": null,
+        "digest": null,
+        "oauth1": null,
+        "oauth2": null
+      },
+      "isHeaderEnabledList": [],
+      "isParamEnabledList": [
+        true
+      ],
+      "bodyContentType": "json",
+      "body": null,
+      "query": null,
+      "formData": []
+    },
+    "responseStatus": null,
+    "message": null,
+    "httpResponseModel": null,
+    "preRequestScript": null,
+    "postRequestScript": null,
+    "aiRequestModel": null
+  },
+  {
+    "id": "myapi-put-posts-id",
+    "apiType": "rest",
+    "name": "Update a post",
+    "description": "",
+    "httpRequestModel": {
+      "method": "put",
+      "url": "https://jsonplaceholder.typicode.com/posts/{id}",
+      "headers": [],
+      "params": [
+        {
+          "name": "id",
+          "value": "{{ID}}"
+        }
+      ],
+      "authModel": {
+        "type": "none",
+        "apikey": null,
+        "bearer": null,
+        "basic": null,
+        "jwt": null,
+        "digest": null,
+        "oauth1": null,
+        "oauth2": null
+      },
+      "isHeaderEnabledList": [],
+      "isParamEnabledList": [
+        true
+      ],
+      "bodyContentType": "json",
+      "body": "{}",
+      "query": null,
+      "formData": []
+    },
+    "responseStatus": null,
+    "message": null,
+    "httpResponseModel": null,
+    "preRequestScript": null,
+    "postRequestScript": null,
+    "aiRequestModel": null
+  },
+  {
+    "id": "myapi-delete-posts-id",
+    "apiType": "rest",
+    "name": "Delete a post",
+    "description": "",
+    "httpRequestModel": {
+      "method": "delete",
+      "url": "https://jsonplaceholder.typicode.com/posts/{id}",
+      "headers": [],
+      "params": [
+        {
+          "name": "id",
+          "value": "{{ID}}"
+        }
+      ],
+      "authModel": {
+        "type": "none",
+        "apikey": null,
+        "bearer": null,
+        "basic": null,
+        "jwt": null,
+        "digest": null,
+        "oauth1": null,
+        "oauth2": null
+      },
+      "isHeaderEnabledList": [],
+      "isParamEnabledList": [
+        true
+      ],
+      "bodyContentType": "json",
+      "body": null,
+      "query": null,
+      "formData": []
+    },
+    "responseStatus": null,
+    "message": null,
+    "httpResponseModel": null,
+    "preRequestScript": null,
+    "postRequestScript": null,
+    "aiRequestModel": null
+  }
+]

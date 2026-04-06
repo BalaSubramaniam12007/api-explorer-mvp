@@ -7,6 +7,12 @@
       "latest_version": "2026-04-05"
     },
     {
+      "id": "myapi",
+      "name": "My API",
+      "category": "demo",
+      "latest_version": "2026-04-06"
+    },
+    {
       "id": "petstore",
       "name": "Petstore API",
       "category": "demo",

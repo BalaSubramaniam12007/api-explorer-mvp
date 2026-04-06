@@ -5,6 +5,9 @@
       "petstore",
       "Github",
       "stripe"
+    ],
+    [
+      "myapi"
     ]
   ],
   "current_batch_index": 0
