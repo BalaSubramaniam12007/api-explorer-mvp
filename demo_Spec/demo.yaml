@@ -1,0 +1,121 @@
+openapi: "3.1.0"
+info:
+  title: API Registry
+  description: >
+    A registry of third-party API integrations, each described by a category,
+    display name, and a URL pointing to its OpenAPI specification.
+  version: "1.0.0"
+  contact:
+    name: API Registry Maintainers
+
+paths:
+  /registry:
+    get:
+      summary: List all registered APIs
+      operationId: listApis
+      tags:
+        - Registry
+      responses:
+        "200":
+          description: A map of registered API entries keyed by integration identifier.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiRegistry"
+              example:
+                Github:
+                  category: Tools
+                  name: Github API
+                  openapi_url: "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.json"
+
+  /registry/{apiId}:
+    get:
+      summary: Get a single registered API entry
+      operationId: getApiById
+      tags:
+        - Registry
+      parameters:
+        - name: apiId
+          in: path
+          required: true
+          description: The unique identifier key for the API (e.g. "Github").
+          schema:
+            type: string
+            example: Github
+      responses:
+        "200":
+          description: The API registry entry.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEntry"
+              example:
+                category: Tools
+                name: Github API
+                openapi_url: "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.json"
+        "404":
+          description: API entry not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+
+    ApiRegistry:
+      type: object
+      description: >
+        A map where each key is a unique API identifier (e.g. "Github") and
+        the value is an ApiEntry object.
+      additionalProperties:
+        $ref: "#/components/schemas/ApiEntry"
+      example:
+        Github:
+          category: Tools
+          name: Github API
+          openapi_url: "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.json"
+
+    ApiEntry:
+      type: object
+      description: Metadata for a single registered API integration.
+      required:
+        - category
+        - name
+        - openapi_url
+      properties:
+        category:
+          type: string
+          description: >
+            The grouping category for this API
+            (e.g. "Tools", "Communication", "Storage").
+          example: Tools
+        name:
+          type: string
+          description: Human-readable display name for the API.
+          example: Github API
+        openapi_url:
+          type: string
+          format: uri
+          description: >
+            A publicly accessible URL pointing to the OpenAPI specification
+            (JSON or YAML) for this API.
+          example: "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.json"
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+          example: 404
+        message:
+          type: string
+          example: API entry not found.
+
+tags:
+  - name: Registry
+    description: Endpoints for managing and querying the API integration registry.
