@@ -1,62 +1,46 @@
-/// Parses OpenAPI documents and maps endpoints to API Dash template shape.
+/// Fetches OpenAPI specs and maps endpoints to APIDash template shape.
 library;
 
 import 'dart:convert';
-
 import 'package:http/http.dart' as http;
+import 'package:openapi_spec/openapi_spec.dart';
 import 'package:yaml/yaml.dart';
 
-const httpMethods = {
-  'get',
-  'post',
-  'put',
-  'patch',
-  'delete',
-  'head',
-  'options'
-};
-
-/// Loads JSON or YAML OpenAPI text into a map.
-Map<String, dynamic> parseOpenApi(String raw) {
+/// Fetches and parses one OpenAPI document. Returns null on failure.
+Future<OpenApi?> fetchSpec(String url) async {
   try {
-    final jsonMap = jsonDecode(raw);
-    return jsonMap is Map<String, dynamic> ? jsonMap : <String, dynamic>{};
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode < 200 || response.statusCode >= 300) return null;
+    return _parseSpec(response.body);
   } catch (_) {
-    final yamlDoc = loadYaml(raw);
-    final normalized = jsonDecode(jsonEncode(yamlDoc));
-    return normalized is Map<String, dynamic>
-        ? normalized
-        : <String, dynamic>{};
+    return null;
   }
 }
 
-/// Fetches one OpenAPI document and returns parsed map data.
-Future<Map<String, dynamic>> fetchSpec(String url) async {
-  final response = await http.get(Uri.parse(url));
-  if (response.statusCode < 200 || response.statusCode >= 300)
-    return <String, dynamic>{};
-  return parseOpenApi(response.body);
-}
-
-/// Returns base URL from OpenAPI 3 servers or OpenAPI 2 host fields.
-String getBaseUrl(Map<String, dynamic> spec) {
-  final servers = spec['servers'];
-  if (servers is List && servers.isNotEmpty && servers.first is Map) {
-    return ((servers.first as Map)['url']?.toString() ?? '')
-        .replaceAll(RegExp(r'/$'), '');
+/// Parses raw JSON or YAML into an [OpenApi] model.
+OpenApi? _parseSpec(String raw) {
+  try {
+    Map<String, dynamic> map;
+    try {
+      map = jsonDecode(raw) as Map<String, dynamic>;
+    } catch (_) {
+      map = jsonDecode(jsonEncode(loadYaml(raw))) as Map<String, dynamic>;
+    }
+    return OpenApi.fromJson(map);
+  } catch (_) {
+    return null;
   }
-  final schemes = spec['schemes'];
-  final scheme = schemes is List && schemes.isNotEmpty
-      ? schemes.first.toString()
-      : 'https';
-  final host = spec['host']?.toString() ?? '';
-  final basePath = spec['basePath']?.toString() ?? '';
-  return '$scheme://$host$basePath'.replaceAll(RegExp(r'/$'), '');
 }
 
-/// Creates a minimal auth model from first security scheme.
-Map<String, dynamic> authModel(Map<String, dynamic> spec) {
-  final model = {
+/// Returns base URL from the first server entry.
+String _baseUrl(OpenApi spec) {
+  final url = spec.servers?.firstOrNull?.url ?? '';
+  return url.endsWith('/') ? url.substring(0, url.length - 1) : url;
+}
+
+/// Builds a minimal auth model from the first declared security scheme.
+Map<String, dynamic> _authModel(OpenApi spec) {
+  final base = <String, dynamic>{
     'type': 'none',
     'apikey': null,
     'bearer': null,
@@ -66,69 +50,86 @@ Map<String, dynamic> authModel(Map<String, dynamic> spec) {
     'oauth1': null,
     'oauth2': null,
   };
-  final components = spec['components'];
-  if (components is! Map) return model;
-  final schemes = components['securitySchemes'];
-  if (schemes is! Map || schemes.isEmpty) return model;
-  final first = schemes.values.first;
-  if (first is! Map) return model;
-  final type = first['type']?.toString() ?? '';
-  final scheme = first['scheme']?.toString() ?? '';
-  if (type == 'apiKey') model['type'] = 'apikey';
-  if (type == 'http' && scheme == 'bearer') model['type'] = 'bearer';
-  return model;
+  final schemes = spec.components?.securitySchemes;
+  if (schemes == null || schemes.isEmpty) return base;
+
+  // Safely detect auth type from first scheme
+  try {
+    final first = schemes.values.first;
+    final schemeType = first.toJson()['type']?.toString() ?? '';
+    if (schemeType.contains('apiKey')) base['type'] = 'apikey';
+    if (schemeType.contains('http')) base['type'] = 'bearer';
+  } catch (_) {
+    // Silently ignore parsing errors
+  }
+  return base;
 }
 
-/// Creates deterministic endpoint id from API ID, method, and path.
-String endpointId(String apiId, String method, String path) {
-  final raw = '$apiId-$method-$path'.toLowerCase();
-  return raw
-      .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
-      .replaceAll(RegExp(r'^-|-$'), '');
+/// Creates a deterministic ID from API ID, method, and path.
+String _endpointId(String apiId, String method, String path) =>
+    '$apiId-$method-$path'
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+        .replaceAll(RegExp(r'^-|-$'), '');
+
+/// Safely extracts operation ID from an operation.
+String? _getOperationId(Operation operation) {
+  try {
+    return operation.toJson()['operationId']?.toString();
+  } catch (_) {
+    return null;
+  }
 }
 
-/// Builds one API Dash-shaped template from one endpoint operation.
-Map<String, dynamic> buildTemplate({
+/// Safely extracts parameter location.
+String _parameterLocation(Parameter p) {
+  try {
+    return p.toJson()['in']?.toString() ?? '';
+  } catch (_) {
+    return '';
+  }
+}
+
+/// Builds one APIDash-shaped template from one [Operation].
+Map<String, dynamic> _buildTemplate({
   required String apiId,
   required String base,
   required String path,
   required String method,
-  required Map<String, dynamic> operation,
+  required Operation operation,
   required Map<String, dynamic> auth,
 }) {
-  final parameters = (operation['parameters'] is List)
-      ? List<Map<String, dynamic>>.from(operation['parameters'])
-      : <Map<String, dynamic>>[];
   final params = <Map<String, dynamic>>[];
   final headers = <Map<String, dynamic>>[];
 
-  for (final p in parameters) {
-    final name = p['name']?.toString() ?? 'value';
-    final location = p['in']?.toString() ?? '';
+  for (final p in operation.parameters ?? []) {
+    final name = p.name ?? 'value';
     final value = '{{${name.toUpperCase()}}}';
-    if (location == 'query' || location == 'path')
+    final paramIn = _parameterLocation(p);
+
+    if (paramIn.contains('query') || paramIn.contains('path')) {
       params.add({'name': name, 'value': value});
-    if (location == 'header') headers.add({'name': name, 'value': value});
+    } else if (paramIn.contains('header')) {
+      headers.add({'name': name, 'value': value});
+    }
   }
 
-  final requestBody = operation['requestBody'];
-  final content = requestBody is Map ? requestBody['content'] : null;
+  final content = operation.requestBody?.content;
   var bodyType = 'json';
   String? body;
-  if (content is Map) {
+  if (content != null) {
     if (content.containsKey('application/json')) body = '{}';
-    if (content.containsKey('application/x-www-form-urlencoded'))
-      bodyType = 'form';
+    if (content.containsKey('application/x-www-form-urlencoded')) bodyType = 'form';
     if (content.containsKey('multipart/form-data')) bodyType = 'multipart';
   }
 
   return {
-    'id': endpointId(apiId, method, path),
+    'id': _endpointId(apiId, method, path),
     'apiType': 'rest',
-    'name': operation['summary']?.toString() ??
-        operation['operationId']?.toString() ??
+    'name': operation.summary ??
+        _getOperationId(operation) ??
         '${method.toUpperCase()} $path',
-    'description': operation['description']?.toString() ?? '',
+    'description': operation.description ?? '',
     'httpRequestModel': {
       'method': method,
       'url': '$base$path',
@@ -151,30 +152,38 @@ Map<String, dynamic> buildTemplate({
   };
 }
 
-/// Converts one OpenAPI spec map into API Dash request template list.
+/// Converts one [OpenApi] model into an APIDash request template list.
 List<Map<String, dynamic>> extractTemplates({
   required String apiId,
-  required Map<String, dynamic> spec,
+  required OpenApi spec,
 }) {
-  final base = getBaseUrl(spec);
-  final auth = authModel(spec);
+  final base = _baseUrl(spec);
+  final auth = _authModel(spec);
   final templates = <Map<String, dynamic>>[];
-  final paths = spec['paths'];
-  if (paths is! Map) return templates;
 
-  for (final entry in paths.entries) {
-    final path = entry.key.toString();
-    final operations = entry.value;
-    if (operations is! Map) continue;
-    for (final op in operations.entries) {
-      final method = op.key.toString().toLowerCase();
-      if (!httpMethods.contains(method) || op.value is! Map) continue;
-      templates.add(buildTemplate(
+  final paths = spec.paths;
+  if (paths == null) return templates;
+
+  for (final pathEntry in paths.entries) {
+    final path = pathEntry.key;
+    final item = pathEntry.value;
+
+    for (final (method, op) in [
+      ('get', item.get),
+      ('post', item.post),
+      ('put', item.put),
+      ('patch', item.patch),
+      ('delete', item.delete),
+      ('head', item.head),
+      ('options', item.options),
+    ]) {
+      if (op == null) continue;
+      templates.add(_buildTemplate(
         apiId: apiId,
         base: base,
         path: path,
         method: method,
-        operation: Map<String, dynamic>.from(op.value as Map),
+        operation: op,
         auth: auth,
       ));
     }
