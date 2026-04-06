@@ -189,5 +189,128 @@
     "preRequestScript": null,
     "postRequestScript": null,
     "aiRequestModel": null
+  },
+  {
+    "id": "myapi-get-posts-id-comments",
+    "apiType": "rest",
+    "name": "Get comments for a post",
+    "description": "",
+    "httpRequestModel": {
+      "method": "get",
+      "url": "https://jsonplaceholder.typicode.com/posts/{id}/comments",
+      "headers": [],
+      "params": [
+        {
+          "name": "id",
+          "value": "{{ID}}"
+        }
+      ],
+      "authModel": {
+        "type": "none",
+        "apikey": null,
+        "bearer": null,
+        "basic": null,
+        "jwt": null,
+        "digest": null,
+        "oauth1": null,
+        "oauth2": null
+      },
+      "isHeaderEnabledList": [],
+      "isParamEnabledList": [
+        true
+      ],
+      "bodyContentType": "json",
+      "body": null,
+      "query": null,
+      "formData": []
+    },
+    "responseStatus": null,
+    "message": null,
+    "httpResponseModel": null,
+    "preRequestScript": null,
+    "postRequestScript": null,
+    "aiRequestModel": null
+  },
+  {
+    "id": "myapi-post-posts-id-comments",
+    "apiType": "rest",
+    "name": "Add a comment to a post",
+    "description": "",
+    "httpRequestModel": {
+      "method": "post",
+      "url": "https://jsonplaceholder.typicode.com/posts/{id}/comments",
+      "headers": [],
+      "params": [
+        {
+          "name": "id",
+          "value": "{{ID}}"
+        }
+      ],
+      "authModel": {
+        "type": "none",
+        "apikey": null,
+        "bearer": null,
+        "basic": null,
+        "jwt": null,
+        "digest": null,
+        "oauth1": null,
+        "oauth2": null
+      },
+      "isHeaderEnabledList": [],
+      "isParamEnabledList": [
+        true
+      ],
+      "bodyContentType": "json",
+      "body": "{}",
+      "query": null,
+      "formData": []
+    },
+    "responseStatus": null,
+    "message": null,
+    "httpResponseModel": null,
+    "preRequestScript": null,
+    "postRequestScript": null,
+    "aiRequestModel": null
+  },
+  {
+    "id": "myapi-get-posts-search",
+    "apiType": "rest",
+    "name": "Search posts by userId",
+    "description": "",
+    "httpRequestModel": {
+      "method": "get",
+      "url": "https://jsonplaceholder.typicode.com/posts/search",
+      "headers": [],
+      "params": [
+        {
+          "name": "userId",
+          "value": "{{USERID}}"
+        }
+      ],
+      "authModel": {
+        "type": "none",
+        "apikey": null,
+        "bearer": null,
+        "basic": null,
+        "jwt": null,
+        "digest": null,
+        "oauth1": null,
+        "oauth2": null
+      },
+      "isHeaderEnabledList": [],
+      "isParamEnabledList": [
+        true
+      ],
+      "bodyContentType": "json",
+      "body": null,
+      "query": null,
+      "formData": []
+    },
+    "responseStatus": null,
+    "message": null,
+    "httpResponseModel": null,
+    "preRequestScript": null,
+    "postRequestScript": null,
+    "aiRequestModel": null
   }
 ]
