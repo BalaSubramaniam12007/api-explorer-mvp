@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>API Explorer</title>
+<style>
+:root{--bg:#f6fbff;--card:#fff;--accent:#49a6ff;--text:#12324a}
+body{margin:0;font-family:system-ui,Segoe UI,Arial;background:var(--bg);color:var(--text)}
+.wrap{max-width:900px;margin:28px auto;padding:20px}
+.card{background:var(--card);border:1px solid #d7e8f7;border-radius:12px;padding:18px}
+h1{margin:0 0 6px;font-size:28px}
+p{margin:0 0 12px;color:#5f7b95}
+label{display:block;margin:8px 0;color:#345}
+input,select,textarea{width:100%;padding:8px;border:1px solid #e2f0ff;border-radius:8px;background:#fff;color:var(--text)}
+textarea{height:80px;resize:none}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.actions{margin-top:12px}
+.btn{display:inline-block;padding:8px 12px;border-radius:8px;background:var(--accent);color:#fff;text-decoration:none}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <section class="card">
+    <h1>API Explorer</h1>
+    <p>Light blue & white static prototype — UI only.</p>
+    <!-- Minimal static form (no JS) -->
+    <div class="grid">
+      <div>
+        <label>API id<input value="stripe" readonly></label>
+        <label>Name<input value="Stripe API" readonly></label>
+      </div>
+      <div>
+        <label>OpenAPI URL<input value="https://example.com/openapi.json" readonly></label>
+        <label>Category<select><option>payments</option><option>ai</option><option>other</option></select></label>
+      </div>
+    </div>
+    <label>Notes<textarea readonly>Prototype only — no submission.</textarea></label>
+    <div class="actions"><span class="btn">Preview JSON</span></div>
+  </section>
+
+  <section style="margin-top:14px" class="card">
+    <pre style="margin:0;background:#f8fcff;border-radius:8px;padding:12px;border:1px solid #e6f3ff">{
+  "stripe": {
+    "name": "Stripe API",
+    "openapi_url": "https://example.com/openapi.json",
+    "category": "payments"
+  }
+}</pre>
+  </section>
+
+  <!-- Footer note -->
+  <section style="margin-top:12px;text-align:center;color:#6b869e;font-size:13px">
+    This is a visual-only prototype for GitHub Pages.
+  </section>
+
+</main>
+
+</body>
+</html>
