@@ -2,8 +2,9 @@
   "id": "Demo",
   "name": "DEMO API",
   "category": "Tools",
-  "latest_version": "2026-04-06",
+  "latest_version": "2026-04-08",
   "versions": [
-    "2026-04-06"
+    "2026-04-06",
+    "2026-04-08"
   ]
 }
