@@ -18,5 +18,10 @@
     "category": "demo",
     "name": "Petstore API",
     "openapi_url": "https://petstore3.swagger.io/api/v3/openapi.json"
+  },
+  "twilio": {
+    "category": "communications",
+    "name": "Twilio API v2010",
+    "openapi_url": "https://raw.githubusercontent.com/twilio/twilio-oai/main/spec/json/twilio_api_v2010.json"
   }
 }

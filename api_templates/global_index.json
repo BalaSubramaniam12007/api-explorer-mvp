@@ -23,10 +23,17 @@
       "name": "Petstore API",
       "category": "demo",
       "latest_version": "2026-04-03"
+    },
+    {
+      "id": "twilio",
+      "name": "Twilio API v2010",
+      "category": "communications",
+      "latest_version": "2026-04-12"
     }
   ],
   "categories": [
     "Tools",
+    "communications",
     "demo"
   ]
 }
