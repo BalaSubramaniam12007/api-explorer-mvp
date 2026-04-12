@@ -2,10 +2,6 @@
   "errors": {},
   "last_run_at": "2026-04-12T16:02:27.526785+00:00",
   "processed_batch_index": 0,
-  "processed_ids": [
-    "gitlab"
-  ],
-  "updated_ids": [
-    "gitlab"
-  ]
+  "processed_ids": [],
+  "updated_ids": []
 }
