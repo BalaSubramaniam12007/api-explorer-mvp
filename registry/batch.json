@@ -10,7 +10,8 @@
       "Demo"
     ],
     [
-      "twilio"
+      "twilio",
+      "gitlab"
     ]
   ],
   "current_batch_index": 0

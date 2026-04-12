@@ -1,7 +1,1 @@
-{
-  "gitlab": {
-    "name": "GitLab REST API v4",
-    "openapi_url": "https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/api/openapi/openapi.yaml?plain=1",
-    "category": "devops"
-  }
-}
+{}
