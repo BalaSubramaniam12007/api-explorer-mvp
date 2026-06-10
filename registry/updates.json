@@ -1,15 +1,11 @@
 {
-  "errors": {
-    "petstore": "HTTP Error 403: Forbidden"
-  },
-  "last_run_at": "2026-06-09T05:58:51.256016+00:00",
-  "next_batch_index": 1,
-  "processed_batch_index": 0,
+  "errors": {},
+  "last_run_at": "2026-06-10T06:11:37.056546+00:00",
+  "next_batch_index": 2,
+  "processed_batch_index": 1,
   "processed_ids": [
-    "petstore",
-    "Github"
+    "myapi",
+    "Demo"
   ],
-  "updated_ids": [
-    "Github"
-  ]
+  "updated_ids": []
 }
