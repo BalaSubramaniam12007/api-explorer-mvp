@@ -1,11 +1,13 @@
 {
-  "errors": {},
-  "last_run_at": "2026-06-14T06:23:52.260268+00:00",
-  "next_batch_index": 0,
-  "processed_batch_index": 2,
+  "errors": {
+    "petstore": "HTTP Error 403: Forbidden"
+  },
+  "last_run_at": "2026-06-15T07:06:21.729928+00:00",
+  "next_batch_index": 1,
+  "processed_batch_index": 0,
   "processed_ids": [
-    "twilio",
-    "TrainTravelAPI"
+    "petstore",
+    "Github"
   ],
   "updated_ids": []
 }
