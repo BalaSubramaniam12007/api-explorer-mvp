@@ -2,10 +2,11 @@
   "id": "twilio",
   "name": "Twilio API v2010",
   "category": "communications",
-  "latest_version": "2026-05-09",
+  "latest_version": "2026-08-13",
   "versions": [
     "2026-04-12",
     "2026-04-15",
-    "2026-05-09"
+    "2026-05-09",
+    "2026-08-13"
   ]
 }
