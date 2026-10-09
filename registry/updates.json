@@ -1,11 +1,13 @@
 {
   "errors": {},
-  "last_run_at": "2026-10-08T08:06:14.588757+00:00",
-  "next_batch_index": 2,
-  "processed_batch_index": 1,
+  "last_run_at": "2026-10-09T08:05:50.279979+00:00",
+  "next_batch_index": 0,
+  "processed_batch_index": 2,
   "processed_ids": [
-    "myapi",
-    "Demo"
+    "twilio",
+    "TrainTravelAPI"
   ],
-  "updated_ids": []
+  "updated_ids": [
+    "twilio"
+  ]
 }
