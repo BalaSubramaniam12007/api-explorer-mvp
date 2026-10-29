@@ -1,14 +1,11 @@
 {
   "errors": {},
-  "last_run_at": "2026-10-28T07:38:10.376622+00:00",
-  "next_batch_index": 1,
-  "processed_batch_index": 0,
+  "last_run_at": "2026-10-29T07:43:49.113177+00:00",
+  "next_batch_index": 2,
+  "processed_batch_index": 1,
   "processed_ids": [
-    "petstore",
-    "Github"
+    "myapi",
+    "Demo"
   ],
-  "updated_ids": [
-    "petstore",
-    "Github"
-  ]
+  "updated_ids": []
 }
