@@ -2,9 +2,10 @@
   "id": "petstore",
   "name": "Petstore API",
   "category": "demo",
-  "latest_version": "2026-10-28",
+  "latest_version": "2026-10-31",
   "versions": [
     "2026-04-03",
-    "2026-10-28"
+    "2026-10-28",
+    "2026-10-31"
   ]
 }
