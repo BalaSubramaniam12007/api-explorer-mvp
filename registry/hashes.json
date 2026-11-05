@@ -4,5 +4,5 @@
   "TrainTravelAPI": "sha256:16cd100b59ec32d7c9eecfde7de95e90f1ef8fbc5d61087bac56667556cde72b",
   "myapi": "sha256:bbb2f932cbe94ae80062b79f6dd4fa85195c6591cca705659177314b6802b6e3",
   "petstore": "sha256:74f0aabdcfb94cbbff16c78ca6da1a59d579a2e54f61b52876149dd87137fd6f",
-  "twilio": "sha256:bfdf249a129819af274d6bdc7672156ea3416ad48670a6f0544def6ef386ba87"
+  "twilio": "sha256:f5efc0ed7078b035f675e04aa2774eaea43a0606c1d699b1fd35759258e5ddc6"
 }
